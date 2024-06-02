@@ -8,6 +8,7 @@ path = "src/lib.rs"
 
 
 [dependencies]
+volatile = "0.5.4"
 
 
 [profile.dev]
