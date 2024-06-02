@@ -1,11 +1,14 @@
 use core::cell::UnsafeCell;
 use core::sync::atomic::{AtomicBool, Ordering};
-use volatile::Volatile;
 
 pub struct Spinlock<T> {
     lock: AtomicBool,
     data: UnsafeCell<T>,
 }
+
+unsafe impl<T> Sync for Spinlock<T> {}
+
+unsafe impl<T> Send for Spinlock<T> {}
 
 impl<T> Spinlock<T> {
     pub const fn new(data: T) -> Self {
@@ -16,17 +19,28 @@ impl<T> Spinlock<T> {
     }
 
     pub fn lock(&self) -> SpinlockGuard<T> {
-        while self.lock.compare_and_swap(false, true, Ordering::Acquire) {
-            core::hint::spin_loop();
+        loop {
+            match self
+                .lock
+                .compare_exchange(false, true, Ordering::Acquire, Ordering::SeqCst)
+            {
+                Ok(_) => break,
+                Err(_) => {
+                    core::hint::spin_loop();
+                }
+            }
         }
+
         SpinlockGuard { lock: self }
     }
 
     pub fn try_lock(&self) -> Option<SpinlockGuard<T>> {
-        if self.lock.compare_and_swap(false, true, Ordering::Acquire) {
-            None
-        } else {
-            Some(SpinlockGuard { lock: self })
+        match self
+            .lock
+            .compare_exchange(false, true, Ordering::Acquire, Ordering::SeqCst)
+        {
+            Ok(_) => Some(SpinlockGuard { lock: self }),
+            Err(_) => None,
         }
     }
 }
