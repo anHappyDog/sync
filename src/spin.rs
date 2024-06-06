@@ -22,7 +22,7 @@ impl<T> Spinlock<T> {
         loop {
             match self
                 .lock
-                .compare_exchange(false, true, Ordering::Acquire, Ordering::SeqCst)
+                .compare_exchange(false, true, Ordering::Acquire, Ordering::Acquire)
             {
                 Ok(_) => break,
                 Err(_) => {
@@ -37,7 +37,7 @@ impl<T> Spinlock<T> {
     pub fn try_lock(&self) -> Option<SpinlockGuard<T>> {
         match self
             .lock
-            .compare_exchange(false, true, Ordering::Acquire, Ordering::SeqCst)
+            .compare_exchange(false, true, Ordering::Acquire, Ordering::Acquire)
         {
             Ok(_) => Some(SpinlockGuard { lock: self }),
             Err(_) => None,
