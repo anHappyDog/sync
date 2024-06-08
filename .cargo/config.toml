@@ -1,0 +1,8 @@
+[build]
+target = "mipsel-unknown-none"
+
+
+
+[unstable]
+mtime-on-use = true
+build-std = ["core", "alloc"]

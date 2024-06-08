@@ -19,6 +19,7 @@ impl<T> Spinlock<T> {
     }
 
     pub fn lock(&self) -> SpinlockGuard<T> {
+        // mips32::int::disable_timer_interrupt();
         loop {
             match self
                 .lock
@@ -30,7 +31,7 @@ impl<T> Spinlock<T> {
                 }
             }
         }
-
+        // mips32::int::enable_timer_interrupt();
         SpinlockGuard { lock: self }
     }
 

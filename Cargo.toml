@@ -13,3 +13,10 @@ path = "src/lib.rs"
 [profile.dev]
 opt-level = 0
 debug = true
+
+
+
+
+[features]
+default = ["mips32"]
+mips32 = []
